@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=~/.docker-history/scripts/logger.sh
+ExecStart=/root/.docker-history/scripts/logger.sh
 Restart=always
 RestartSec=5
 StandardOutput=journal
