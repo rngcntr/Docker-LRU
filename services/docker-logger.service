@@ -1,5 +1,5 @@
 [Unit]
-Description=My Long-Running Bash Script
+Description=Docker LRU Tracker
 After=network.target
 
 [Service]
