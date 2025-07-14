@@ -1,0 +1,15 @@
+[Unit]
+Description=My Long-Running Bash Script
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=~/.docker-history/scripts/logger.sh
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
