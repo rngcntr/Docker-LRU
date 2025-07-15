@@ -8,7 +8,7 @@ fi
 TARGET_BYTES=$1
 
 # Sorted list of recently started images
-SORTED_LIST=$($HOME/.docker-lru/scripts/list-recent-images.sh)
+SORTED_LIST=$(/root/.docker-lru/scripts/list-recent-images.sh)
 readarray -t RECENT_IMAGES <<< "$SORTED_LIST"
 
 # First, we will delete all images that are not in the RECENT_IMAGES
