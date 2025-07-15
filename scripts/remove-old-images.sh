@@ -38,7 +38,7 @@ done
 # We will start from the least recently used image and work our way up
 
 for least_recent_image in "${RECENT_IMAGES[@]}"; do
-    total_used_bytes=$(curl --silent --unix-socket /var/run/docker.sock http://localhost/system/df | jq '[.Images[].Size] | add')
+    total_used_bytes=$(curl --silent --unix-socket /var/run/docker.sock http://localhost/system/df | jq '.LayersSize')
 
     if (( total_used_bytes > $TARGET_BYTES )); then
         docker rmi "$least_recent_image"
