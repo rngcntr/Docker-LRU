@@ -7,21 +7,22 @@ fi
 
 TARGET_BYTES=$1
 
-# Generate list of images to keep using your script
-KEEP_LIST=$($HOME/.docker-history/scripts/list-recent-images.sh)
+# Sorted list of recently started images
+SORTED_LIST=$($HOME/.docker-lru/scripts/list-recent-images.sh)
+readarray -t RECENT_IMAGES <<< "$SORTED_LIST"
 
-# Convert the list to an array
-readarray -t KEEP_ARRAY <<< "$KEEP_LIST"
+# First, we will delete all images that are not in the RECENT_IMAGES
+# This ensures that we only keep the images that have been started recently
 
 # Get all local images with their name and ID
 docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | while read -r line; do
     image_name=$(awk '{print $1}' <<< "$line")
     image_id=$(awk '{print $2}' <<< "$line")
 
-    # Check if image_name is in KEEP_ARRAY
+    # Check if image_name is in RECENT_IMAGES
     keep=false
-    for keep_image in "${KEEP_ARRAY[@]}"; do
-        if [[ "$image_name" == "$keep_image" ]]; then
+    for recent_image in "${RECENT_IMAGES[@]}"; do
+        if [[ "$image_name" == "$recent_image" ]]; then
             keep=true
             break
         fi
@@ -33,10 +34,13 @@ docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | while read -r line; 
     fi
 done
 
-for least_recent_image in "${KEEP_ARRAY[@]}"; do
-    current_bytes=$(curl --silent --unix-socket /var/run/docker.sock http://localhost/system/df | jq '[.Images[].Size] | add')
+# Now, we will beging deleting more recently used images until we hit the target threshold of used bytes
+# We will start from the least recently used image and work our way up
 
-    if (( current_bytes > $TARGET_BYTES )); then
+for least_recent_image in "${RECENT_IMAGES[@]}"; do
+    total_used_bytes=$(curl --silent --unix-socket /var/run/docker.sock http://localhost/system/df | jq '[.Images[].Size] | add')
+
+    if (( total_used_bytes > $TARGET_BYTES )); then
         docker rmi "$least_recent_image"
     fi
 done

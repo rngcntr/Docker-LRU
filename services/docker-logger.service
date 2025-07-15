@@ -1,15 +1,14 @@
 [Unit]
 Description=Docker LRU Tracker
-After=network.target
+After=docker.service
+BindsTo=docker.service
 
 [Service]
 Type=simple
-ExecStart=/root/.docker-history/scripts/logger.sh
+ExecStart=/root/.docker-lru/scripts/track-started-images.sh
+User=root
+Group=root
 Restart=always
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-
