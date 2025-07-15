@@ -30,14 +30,14 @@ git clone https://github.com/rngcntr/Docker-LRU.git .docker-lru
 Copy the systemd service file and enable it:
 
 ```sh
-cp .docker-lru/services/docker-logger.service /etc/systemd/system/
+cp .docker-lru/services/docker-lru-tracker.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now docker-logger.service
+systemctl enable --now docker-lru-tracker.service
 ```
 
 > **Note:**  
 > The service runs as `root` and expects the scripts in `/root/.docker-lru/scripts/`.  
-> Adjust the `ExecStart` path in `docker-logger.service` if you use a different location.
+> Adjust the `ExecStart` path in `docker-lru-tracker.service` if you use a different location.
 
 ## Usage
 
