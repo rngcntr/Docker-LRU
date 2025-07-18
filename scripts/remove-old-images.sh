@@ -8,7 +8,7 @@ fi
 TARGET_BYTES=$1
 
 # Sorted list of recently started images
-SORTED_LIST=$(/root/.docker-lru/scripts/list-recent-images.sh)
+SORTED_LIST=$(/root/.docker-lru/scripts/list-recent-images.sh -o h)
 readarray -t RECENT_IMAGES <<< "$SORTED_LIST"
 
 # First, we will delete all images that are not in the RECENT_IMAGES
@@ -30,7 +30,7 @@ docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | while read -r line; 
 
     if [[ "$keep" == false ]]; then
         echo "Removing image: $image_name ($image_id)"
-        docker rmi "$image_id"
+        docker rmi -f "$image_id"
     fi
 done
 
@@ -41,6 +41,15 @@ for least_recent_image in "${RECENT_IMAGES[@]}"; do
     total_used_bytes=$(curl --silent --unix-socket /var/run/docker.sock http://localhost/system/df | jq '.LayersSize')
 
     if (( total_used_bytes > $TARGET_BYTES )); then
-        docker rmi "$least_recent_image"
+        echo "Removing least recently used image: $least_recent_image"
+        docker rmi -f "$least_recent_image"
+        rm /root/.docker-lru/images/"$least_recent_image"
     fi
 done
+
+# Clean up dangling containers, volumes, and networks
+docker container prune -f
+docker volume prune -f
+docker network prune -f
+
+docker system df
