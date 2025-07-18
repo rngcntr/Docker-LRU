@@ -15,9 +15,9 @@ readarray -t RECENT_IMAGES <<< "$SORTED_LIST"
 # This ensures that we only keep the images that have been started recently
 
 # Get all local images with their name and ID
-docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | while read -r line; do
+docker images --no-trunc --format "{{.Repository}}:{{.Tag}} {{.ID}}" | while read -r line; do
     image_name=$(awk '{print $1}' <<< "$line")
-    image_id=$(awk '{print $2}' <<< "$line")
+    image_id=$(awk '{print $2}' <<< "$line" | cut -d ':' -f 2)
 
     # Check if image_name is in RECENT_IMAGES
     keep=false
