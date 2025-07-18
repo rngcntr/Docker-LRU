@@ -49,7 +49,7 @@ done
 
 # Clean up dangling containers, volumes, and networks
 docker container prune -f
-docker volume prune -f
-docker network prune -f
+for vol in $(docker volume ls --filter "dangling=true" --quiet); do docker volume rm "$vol"; done
+for net in $(docker network ls --filter "dangling=true" --quiet); do docker network rm "$net"; done
 
 docker system df
