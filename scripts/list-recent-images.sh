@@ -15,7 +15,7 @@ mkdir -p "/root/.docker-lru/images"
 
 find "/root/.docker-lru/images/" -maxdepth 1 -type f | while read -r path; do
     timestamp=$(cut -d ' ' -f 1 "$path")
-    image=$(cut -d ' ' -f 2 "$path")
+    image=$(cut -d ' ' -f 2- "$path")
     hashname=$(basename "$path")
     line=""
     [[ $output == *t* ]] && line+="$timestamp "
