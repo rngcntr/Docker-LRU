@@ -1,15 +1,14 @@
 #! /usr/bin/env bash
 
 # Log container start events with the current unix timestamp and the image name
-docker events --filter event=start --format '{{ .Time }} {{ .Actor.Attributes.image }}' | while read -r timestamp image; do
+docker events --filter event=start --format '{{ .Time }} {{ .Actor.Attributes.image }}' | while read -r current_time image; do
     hash=$(docker image inspect --format '{{ .ID }}' "$image" | cut -d ':' -f 2)
     image=$(docker image inspect --format '{{ .RepoTags }}' "$image")
-    echo "$timestamp $image $hash"
-done | while read -r current_time image hash; do
+    echo "Image $image started at timestamp $current_time."
+
     # Directory to keep track of started images
     mkdir -p "/root/.docker-lru/images"
 
-    echo "Image $image started at timestamp $current_time."
     if [[ ! -f "/root/.docker-lru/images/$hash" ]]; then
         # File doesn't exist, which means the image has never been started before
         echo "Image $image has never been started before. Initializing at /root/.docker-lru/images/$hash ..."

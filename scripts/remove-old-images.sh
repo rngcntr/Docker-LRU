@@ -22,7 +22,7 @@ docker images --no-trunc --format "{{ .Repository }}:{{ .Tag }} {{ .ID }}" | whi
     # Check if image_name is in RECENT_IMAGES
     keep=false
     for recent_image in "${RECENT_IMAGES[@]}"; do
-        if [[ "$image_name" == "$recent_image" ]]; then
+        if [[ "$image_id" == "$recent_image" ]]; then
             keep=true
             break
         fi
