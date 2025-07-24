@@ -14,7 +14,11 @@ done
 mkdir -p "/root/.docker-lru/images"
 
 find "/root/.docker-lru/images/" -maxdepth 1 -type f | while read -r path; do
+    # Sort by most recent usage, beginning with the oldest image
     timestamp=$(cut -d ' ' -f 1 "$path")
+    echo "$timestamp $path"
+done | sort -nk 1 | awk 'NF' | while read -r timestamp path; do
+    # Format line as requested by parameters
     image=$(cut -d ' ' -f 2- "$path")
     hashname=$(basename "$path")
     line=""
@@ -23,5 +27,4 @@ find "/root/.docker-lru/images/" -maxdepth 1 -type f | while read -r path; do
     [[ $output == *n* ]] && line+="$image "
     # Remove trailing whitespace
     echo "$line" | awk '{$1=$1};1'
-# Sort by most recent usage, beginning with the oldest image
-done | sort -nk 1 | awk 'NF'
+done

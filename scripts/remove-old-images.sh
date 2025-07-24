@@ -9,9 +9,8 @@ TARGET_BYTES=$1
 
 # Sorted list of recently started images
 SORTED_LIST=$(/root/.docker-lru/scripts/list-recent-images.sh -o h)
-readarray -t RECENT_IMAGES <<< "$SORTED_LIST"
 
-# First, we will delete all images that are not in the RECENT_IMAGES
+# First, we will delete all images that are not in the SORTED_LIST
 # This ensures that we only keep the images that have been started recently
 
 # Get all local images with their name and ID
@@ -19,9 +18,9 @@ docker images --no-trunc --format "{{ .Repository }}:{{ .Tag }} {{ .ID }}" | whi
     image_name=$(awk '{print $1}' <<< "$line")
     image_id=$(awk '{print $2}' <<< "$line" | cut -d ':' -f 2)
 
-    # Check if image_name is in RECENT_IMAGES
+    # Check if image_name is in SORTED_LIST
     keep=false
-    for recent_image in "${RECENT_IMAGES[@]}"; do
+    for recent_image in "$SORTED_LIST"; do
         if [[ "$image_id" == "$recent_image" ]]; then
             keep=true
             break
@@ -37,7 +36,7 @@ done
 # Now, we will beging deleting more recently used images until we hit the target threshold of used bytes
 # We will start from the least recently used image and work our way up
 
-for least_recent_image in "${RECENT_IMAGES[@]}"; do
+for least_recent_image in "$SORTED_LIST"; do
     total_used_bytes=$(curl --silent --unix-socket /var/run/docker.sock http://localhost/system/df | jq '.LayersSize')
 
     if (( total_used_bytes > $TARGET_BYTES )); then
